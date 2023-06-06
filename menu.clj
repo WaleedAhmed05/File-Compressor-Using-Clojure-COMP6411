@@ -15,7 +15,8 @@
   "))
 (main-menu)
 
-(defn get-user-input []
+;0.0
+(defn get-user-input []                                     ;user input for menu [ 1 to 5]
   (loop []
     (print "Enter an option: ")
     (flush)
@@ -28,6 +29,7 @@
 (def user-input (get-user-input))
 
 
+;1.0
 (defn display_list_of_files []
   (println "File List: ")
   (let [current-dir (io/file ".")]
@@ -36,20 +38,32 @@
             :let [filename (.getName file)]]
       (println "* ./"filename))))
 
-  ;(let [current-dir (io/file ".")]
-  ;  (doseq [file (file-seq current-dir)
-  ;          :when (.isFile file)
-  ;          :let [filename (.getName file)]]
-  ;    (when (.endsWith filename ".txt")
-  ;      (println filename)))))
+;2.1
+(defn take-file-name-input []                               ;Take filename from user.
+  (print "Enter File Name: ")                               ;TODO put file name validations here.
+  (flush)
+  (let [input (read-line)]
+    input)
+  )
+
+;2.0
+(defn display_file_content []
+  (let [file-path (take-file-name-input)]
+    (try                                                    ;try block to catch if file name doesn't exist.
+    (with-open [reader (io/reader file-path)]
+      (doseq [line (line-seq reader)]                       ;store each line of file in "line"
+        (println line)))
+
+    (catch java.io.FileNotFoundException e                  ;if file doesn't exist continue program.
+      (println (str "File  does not exist. " file-path)))
+    )
+
+    ))
 
 
-
-
-(defn display_file_content [])                             ;TODO
-(defn compress_file [])                             ;TODO
-(defn decompress_file [])                             ;TODO
-(defn exit [])                             ;TODO
+(defn compress_file [])                             ;TODO - To be implement
+(defn decompress_file [])                           ;TODO - To be implement
+(defn exit [])                                      ;TODO - To be implement
 
 
 (defn menu-options [n]
@@ -63,7 +77,7 @@
     )
   )
 
-(menu-options 1)
+(menu-options user-input)
 
 
 
