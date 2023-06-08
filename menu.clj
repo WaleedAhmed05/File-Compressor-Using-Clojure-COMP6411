@@ -1,19 +1,10 @@
 #_( Author -Waleed Ahmed05
            Version - 1.0)
 
+;0.1
 (ns file-compressor.menu
   (:require [clojure.java.io :as io]))
 
-(defn main-menu []                                          ;Main menu to display options.
-  (println "*** Compression Menu***
-------------------------\n
-1. Display list of files
-2. Display file contents
-3. Compress a file
-4. Uncompress a file
-5. Exit
-  "))
-(main-menu)
 
 ;0.0
 (defn get-user-input []                                     ;user input for menu [ 1 to 5]
@@ -26,8 +17,27 @@
         num
         (recur)))))
 
+;0.1
+(defn main-menu []                                          ;Main menu to display options.
+  (println "*** Compression Menu***
+------------------------\n
+1. Display list of files
+2. Display file contents
+3. Compress a file
+4. Uncompress a file
+5. Exit
+  ")
+
+  )
+(main-menu)
 (def user-input (get-user-input))
 
+
+
+
+(defn trigger-user-input []
+  (user-input)
+  )
 
 ;1.0
 (defn display_list_of_files []
@@ -36,7 +46,9 @@
     (doseq [file (file-seq current-dir)
             :when (.isFile file)
             :let [filename (.getName file)]]
-      (println "* ./"filename))))
+      (println "* ./"filename)))
+  ;(main-menu)
+  )
 
 ;2.1
 (defn take-file-name-input []                               ;Take filename from user.
@@ -65,11 +77,11 @@
 (defn decompress_file [])                           ;TODO - To be implement
 (defn exit [])                                      ;TODO - To be implement
 
-
+;0.3
 (defn menu-options [n]
   (case n
-    1 (display_list_of_files)                               ;Display list of files.
-    2 (display_file_content)                                ;Display content of a selected file.
+    1 ((display_list_of_files) (main-menu) (menu-options (get-user-input) ))                                ;Display list of files.
+    2 ((display_file_content) (main-menu) (menu-options (get-user-input) ))                                ;Display content of a selected file.
     3 (compress_file)                                       ;Compress file
     4 (decompress_file)                                     ;UnCompress file back to original
     5 (exit)                                                ;Close program.
