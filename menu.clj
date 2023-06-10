@@ -75,13 +75,15 @@
 
 (defn compress_file [])                             ;TODO - To be implement
 (defn decompress_file [])                           ;TODO - To be implement
-(defn exit [])                                      ;TODO - To be implement
+;5.1
+(defn exit []
+  (System/exit 0))
 
 ;0.3
 (defn menu-options [n]
   (case n
-    1 ((display_list_of_files) (main-menu) (menu-options (get-user-input) ))                                ;Display list of files.
-    2 ((display_file_content) (main-menu) (menu-options (get-user-input) ))                                ;Display content of a selected file.
+    1 ((display_list_of_files) (main-menu) (let [usr-inp (get-user-input)] (menu-options usr-inp)))                                ;Display list of files.
+    2 (display_file_content)                                ;Display content of a selected file.
     3 (compress_file)                                       ;Compress file
     4 (decompress_file)                                     ;UnCompress file back to original
     5 (exit)                                                ;Close program.
