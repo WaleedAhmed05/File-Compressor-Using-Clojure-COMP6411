@@ -2,26 +2,34 @@
   (:require [clojure.java.io :as io]))
 
 
-(defn display_file_content []
-   (let [file-path "core.clj"]
-     (try                                                    ;try block to catch if file name doesn't exist.
-       (with-open [reader (io/reader file-path)]
-         (doseq [line (line-seq reader)]                       ;store each line of file in "line"
-           (println line)))
+(defn read-frequenciesx [file-name]
+  (with-open [reader (io/reader file-name)]
+    (let [lines (line-seq reader)
+          ;words (map clojure.string/lower-case (clojure.string/split (clojure.string/join " " lines) #"\s"))
+          words (clojure.string/split (clojure.string/join " " lines) #"\s")
+          unique-words (distinct words)
+          word-frequencies (zipmap unique-words (range))]
+      word-frequencies)))
 
-       (catch java.io.FileNotFoundException e                  ;if file doesn't exist continue program.
-         (println (str "File  does not exist. " file-path)))
-       )
+;(println (count (read-frequencies "frequency.txt")) )
+(def xVar (read-frequenciesx "frequency.txt"))
+;(println (count (read-frequenciesx "frequency.txt")))
 
-     ))
+;The pink elephant is absolutely groovy
+;The first man is from the last group of people
 
-;(display_file_content)
+(println (get xVar "the")
+         (get xVar "first")
+         (get xVar "man")
+         (get xVar "is")
+         (get xVar "from")
+         (get xVar "the")
+         (get xVar "last")
+         (get xVar "group")
+         (get xVar "of")
+         (get xVar "people")
+         )
 
-(defn process-file [file-path]
-  (with-open [reader (clojure.java.io/reader file-path)]
-    (doseq [line (line-seq reader)]
-      (doseq [word (clojure.string/split line #"\s+")]
-        (println word)))))
 
-(process-file "core.clj")
+
 
