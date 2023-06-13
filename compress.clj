@@ -1,6 +1,8 @@
 (ns file-compressor.compress
   (:require [clojure.java.io :as io])
-  (:require [clojure.string :as strX]))
+  (:require [clojure.string :as strX])
+  (:require [clojure.edn :as edn])
+  )
 
 
 #_ "Decompression Procedure."
@@ -63,16 +65,6 @@
   text
   )
 
-;TODO do not delete.
-;0.4
-;This function will check if a string has two '@', if yes then it's a number.
-;(defn has-numberX? [s]
-;  (>= (count (re-seq #"@" s)) 2))
-;
-;;0.5
-;(defn processed-number [word]
-;  (clojure.string/replace word #"[@]" #(str " " %1 " "))
-;  )
 
 ;0.4
 (defn has-number? [string]
@@ -81,27 +73,16 @@
 
 (defn transform-input-file [words]
   (map #(cond
-          (has-number? %) (str "@"%"@")
-          (has-punctutions? %) (string-processing-func %)
+          (has-number? %) (str "@"%"@")                     ;this will check if a word is number?
+          (has-punctutions? %) (string-processing-func %)   ;if there's any punctuation attached with word.
           (contains? wordsMap (strX/lower-case %)) (get wordsMap (strX/lower-case %)) ;this will simply return freq number from wordsMap
-          :else (str "this is else.")
-
+          :else (str %)
           )
        words)
   )
 
-
-
 (def store-compressed-results                               ;store compressed results.
   (transform-input-file input-file-words-stream))
-
-(doseq [x store-compressed-results]
-      (print x " ")
-      )
-
-
-
-
 
 
 (def output-file-name "output.txt.ct")
@@ -117,15 +98,24 @@
 
 ;3.1
 ;This method will read compressed file to decompress it's content.
+;(defn read-compressed-file [file-name]
+;  (with-open [reader (io/reader file-name)]
+;    (let [lines (line-seq reader)
+;          words (strX/replace (str (strX/split (strX/join " " lines) #"\s"))   #"\s+" "")
+;          ]
+;      words
+;      )))
 (defn read-compressed-file [file-name]
   (with-open [reader (io/reader file-name)]
     (let [lines (line-seq reader)
-          words (strX/split (strX/join " " lines) #"\s")
-          ]
-      words
-      )))
+          words (->> lines
+                     (mapcat #(clojure.string/split % #"\s+"))
+                     (map #(clojure.string/replace % #"\s" "")))]
+      words)))
 
 (def input-file-compressed-stream (read-compressed-file "output.txt.ct"))     ;store input file words.
+
+
 
 ;3.2
 ;This function will map compressed value with real string.
@@ -145,12 +135,23 @@
   (not (nil? (re-find #"[@]" s)))
   )
 
+
+;This function will check if a string has two '@', if yes then it's a number.
+(defn has-two-AtTheRate? [s]
+  (>= (count (re-seq #"@" s)) 2))
+
+(defn processed-number [word]
+  (clojure.string/replace word #"[@]" (str ""))
+  )
+
 ;3.3
 
-(def decompressed-text
+(def decompressed-file
 
   (map #(cond
+          (has-two-AtTheRate? %) (processed-number %)
           (has-alphabet? %) %                         ;if a word has an alphabet treat it as string.
+          (has-number? %) (find-key-by-value wordsMap (Integer/parseInt %) )
           (has-atTheRate %) (str "this is a number")
           :else (str "do-something-else")
            )                         ;else.
@@ -161,9 +162,9 @@
 ;
 
 
-;(doseq [x decompressed-text]
-;    (println x)
-;    )
+(doseq [x decompressed-file]
+    (print  x " ")
+    )
 
 
 
