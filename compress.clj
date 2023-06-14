@@ -1,11 +1,10 @@
 (ns file-compressor.compress
   (:require [clojure.java.io :as io])
   (:require [clojure.string :as strX])
-  (:require [clojure.edn :as edn])
   )
 
 
-#_ "Decompression Procedure."
+#_"compression Procedure."
 ;1.0
 ;This method will read frequency.txt file and store all distinct words in a map.
 (defn read-words-from-frequencytxt [file-name]
@@ -29,13 +28,6 @@
       words
       )))
 
-(def input-file-words-stream (read-input-file "3.txt"))     ;store input file words.
-
-;(defn transform-input-file [words]
-;  (mapv #(get wordsMap (strX/lower-case %)) words))         ;compressing input file words by mapping to it's number.
-
-;(defn transform-input-file [words]
-;  (mapv #(or (get wordsMap (strX/lower-case %)) %) words))
 
 ;0.1 -if a word has punctuation attached.
 (defn has-punctutions? [s]
@@ -47,7 +39,7 @@
 (defn make-space-func [word]
   (clojure.string/split
     (str (clojure.string/replace
-           (str (clojure.string/replace word  #"[,\(\)\[\]@\.?\$\!\-]" #(str " " %1 " "))) #"\s{2,}" " "))
+           (str (clojure.string/replace word #"[,\(\)\[\]@\.?\$\!\-]" #(str " " %1 " "))) #"\s{2,}" " "))
     #"\s+")
   )
 
@@ -73,7 +65,7 @@
 
 (defn transform-input-file [words]
   (map #(cond
-          (has-number? %) (str "@"%"@")                     ;this will check if a word is number?
+          (has-number? %) (str "@" % "@")                   ;this will check if a word is number?
           (has-punctutions? %) (string-processing-func %)   ;if there's any punctuation attached with word.
           (contains? wordsMap (strX/lower-case %)) (get wordsMap (strX/lower-case %)) ;this will simply return freq number from wordsMap
           :else (str %)
@@ -81,30 +73,24 @@
        words)
   )
 
-(def store-compressed-results                               ;store compressed results.
-  (transform-input-file input-file-words-stream))
-
-
-(def output-file-name "output.txt.ct")
+;(def output-file-name "output.txt.ct")
 
 (defn save-words-to-file [words filename]                   ;store compressed words into output file.
   (spit filename (strX/join " " words)))
 
-(save-words-to-file store-compressed-results output-file-name)
+;(save-words-to-file store-compressed-results output-file-name)
+
+(defn main-compress-function [file-name]
+  (def store-compressed-resultX                             ;store compressed results.
+    (transform-input-file (read-input-file file-name)))
+  (save-words-to-file store-compressed-resultX (str file-name ".ct"))
+  )
 
 
 
-#_ "Decompression Procedure."
+#_"Decompression Procedure."
 
 ;3.1
-;This method will read compressed file to decompress it's content.
-;(defn read-compressed-file [file-name]
-;  (with-open [reader (io/reader file-name)]
-;    (let [lines (line-seq reader)
-;          words (strX/replace (str (strX/split (strX/join " " lines) #"\s"))   #"\s+" "")
-;          ]
-;      words
-;      )))
 (defn read-compressed-file [file-name]
   (with-open [reader (io/reader file-name)]
     (let [lines (line-seq reader)
@@ -113,17 +99,17 @@
                      (map #(clojure.string/replace % #"\s" "")))]
       words)))
 
-(def input-file-compressed-stream (read-compressed-file "output.txt.ct"))     ;store input file words.
+;(def input-file-compressed-stream (read-compressed-file "output.txt.ct")) ;store input file words.
 
 
 
 ;3.2
 ;This function will map compressed value with real string.
 (defn find-key-by-value [mapX value]
-(->> mapX
-     (filter #(= value (val %)))
-     (map key)
-     (first)))
+  (->> mapX
+       (filter #(= value (val %)))
+       (map key)
+       (first)))
 
 ;3.3.1
 ;This function will check if a word contains any alphabet?
@@ -131,9 +117,7 @@
 (defn has-alphabet? [s]
   (not (nil? (re-find #"[a-zA-Z]" s))))
 
-(defn has-atTheRate [s]
-  (not (nil? (re-find #"[@]" s)))
-  )
+
 
 
 ;This function will check if a string has two '@', if yes then it's a number.
@@ -144,27 +128,42 @@
   (clojure.string/replace word #"[@]" (str ""))
   )
 
-;3.3
 
-(def decompressed-file
+(defn capitalize-first [s]                                  ;Capitalize first letter of each sentence.
+  (strX/replace-first s #"\b(\w)" #(str (clojure.string/upper-case (str (first %))))))
 
-  (map #(cond
-          (has-two-AtTheRate? %) (processed-number %)
-          (has-alphabet? %) %                         ;if a word has an alphabet treat it as string.
-          (has-number? %) (find-key-by-value wordsMap (Integer/parseInt %) )
-          (has-atTheRate %) (str "this is a number")
-          :else (str "do-something-else")
-           )                         ;else.
-       input-file-compressed-stream)                        ;from this input stream.
+(defn add-space-after-punctuation [s]                       ;fix punctuations.
+  (strX/replace s #"\s,|\s\.|\s\?|\s\!|\s]|\s\)" #(str "" (second %))))
+
+(defn open-paranthesis [s]                                  ;fix punctuations.
+  (strX/replace s #"\(\s|\@\s|\[\s|\$\s" #(str "" (first %))))
+
+
+(defn main-decompress-function [file-name]
+
+
+  (def decompressed-fileX
+
+    (map #(cond
+            (has-two-AtTheRate? %) (processed-number %)
+            (has-alphabet? %) %                             ;if a word has an alphabet treat it as string.
+            (has-number? %) (find-key-by-value wordsMap (Integer/parseInt %))
+            (has-punctutions? %) (str %)
+            :else (str "Invalid")
+            )                                               ;else.
+         (read-compressed-file file-name))                  ;from this input stream.
+    )
+  (def finaloutput
+    (open-paranthesis
+      (add-space-after-punctuation
+        (capitalize-first (strX/join " " decompressed-fileX))
+        ))
+    )
+
+  (println finaloutput)
 
   )
 
-;
-
-
-(doseq [x decompressed-file]
-    (print  x " ")
-    )
 
 
 

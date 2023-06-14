@@ -3,7 +3,9 @@
 
 ;0.1
 (ns file-compressor.menu
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io])
+  (:require [file-compressor.compress :as compress])
+  )
 
 
 ;0.0
@@ -13,7 +15,7 @@
     (flush)
     (let [input (read-line)
           num (Integer/parseInt input)]
-      (if (and (integer? num) (< 0 num 5))                 ; check if user entered valid input
+      (if (and (integer? num) (< 0 num 6))                 ; check if user entered valid input
         num
         (recur)))))
 
@@ -32,12 +34,6 @@
 (main-menu)
 (def user-input (get-user-input))
 
-
-
-
-(defn trigger-user-input []
-  (user-input)
-  )
 
 ;1.0
 (defn display_list_of_files []
@@ -73,8 +69,14 @@
     ))
 
 
-(defn compress_file [])                             ;TODO - To be implement
-(defn decompress_file [])                           ;TODO - To be implement
+(defn compress_file [file-name]
+  (compress/main-compress-function file-name)
+  )
+
+(defn decompress_file [file-name]
+  (compress/main-decompress-function file-name)
+  )
+
 ;5.1
 (defn exit []
   (System/exit 0))
@@ -82,10 +84,36 @@
 ;0.3
 (defn menu-options [n]
   (case n
-    1 ((display_list_of_files) (main-menu) (let [usr-inp (get-user-input)] (menu-options usr-inp)))                                ;Display list of files.
-    2 (display_file_content)                                ;Display content of a selected file.
-    3 (compress_file)                                       ;Compress file
-    4 (decompress_file)                                     ;UnCompress file back to original
+    1 (do                                                   ;Display list of files.
+        (display_list_of_files)
+        (println "\n")
+        (main-menu)
+        (def user-input (get-user-input))
+        (menu-options user-input)
+        )
+    2 (do                                                   ;Display content of a selected file.
+        (println "\n")
+        (display_file_content)
+        (println "\n")
+        (main-menu)
+        (def user-input (get-user-input))
+        (menu-options user-input)
+        )
+    3 (do                                                   ;Compress file
+        (compress_file (take-file-name-input))
+        (println "File has been compressed!")
+        (println "\n")
+        (main-menu)
+        (def user-input (get-user-input))
+        (menu-options user-input)
+        )
+    4 (do                                                   ;UnCompress file back to original
+        (decompress_file (take-file-name-input))
+        (println "\n")
+        (main-menu)
+        (def user-input (get-user-input))
+        (menu-options user-input)
+        )
     5 (exit)                                                ;Close program.
     (println "Invalid Argument")
     )
