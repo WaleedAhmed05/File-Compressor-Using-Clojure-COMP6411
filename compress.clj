@@ -4,13 +4,12 @@
   )
 
 
-#_"compression Procedure."
+#_"compression Section"
 ;1.0
 ;This method will read frequency.txt file and store all distinct words in a map.
 (defn read-words-from-frequencytxt [file-name]
   (with-open [reader (io/reader file-name)]
     (let [lines (line-seq reader)
-          ;words (map strX/lower-case (strX/split (strX/join " " lines) #"\s"))
           words (strX/split (strX/join " " lines) #"\s")
           unique-words (distinct words)                     ;store non duplicates only.
           word-frequencies (zipmap unique-words (range))]   ;store each word as "key" and value as it's occurance.
@@ -73,12 +72,10 @@
        words)
   )
 
-;(def output-file-name "output.txt.ct")
 
 (defn save-words-to-file [words filename]                   ;store compressed words into output file.
   (spit filename (strX/join " " words)))
 
-;(save-words-to-file store-compressed-results output-file-name)
 
 (defn main-compress-function [file-name]
   (def store-compressed-resultX                             ;store compressed results.
@@ -88,7 +85,7 @@
 
 
 
-#_"Decompression Procedure."
+#_"Decompression Section"
 
 ;3.1
 (defn read-compressed-file [file-name]
@@ -99,7 +96,6 @@
                      (map #(clojure.string/replace % #"\s" "")))]
       words)))
 
-;(def input-file-compressed-stream (read-compressed-file "output.txt.ct")) ;store input file words.
 
 
 
@@ -116,8 +112,6 @@
 ;It will consider a word as string if atleast 1 of word's character is alaphabet.
 (defn has-alphabet? [s]
   (not (nil? (re-find #"[a-zA-Z]" s))))
-
-
 
 
 ;This function will check if a string has two '@', if yes then it's a number.
@@ -138,7 +132,6 @@
 (defn open-paranthesis [s]                                  ;fix punctuations.
   (strX/replace s #"\(\s|\@\s|\[\s|\$\s" #(str "" (first %))))
 
-
 (defn main-decompress-function [file-name]
 
 
@@ -153,7 +146,7 @@
             )                                               ;else.
          (read-compressed-file file-name))                  ;from this input stream.
     )
-  (def finaloutput
+  (def finaloutput                                          ;String processing.
     (open-paranthesis
       (add-space-after-punctuation
         (capitalize-first (strX/join " " decompressed-fileX))
@@ -161,7 +154,6 @@
     )
 
   (println finaloutput)
-
   )
 
 
